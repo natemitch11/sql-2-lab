@@ -155,3 +155,96 @@ delete from animals where animals.type = 'lion';
 delete from animals where animals.name like 'M%';
 -- Delete all entries whose age is less than 9.
 delete from animals where animals.age < 9;
+
+ -------------------------------------------------------------------------------------------------
+-- Intermediate - Alter Table
+-- Copy, paste, and run the insert statement from the delete section above. (You should have deleted all the entries.)
+-- Add a column to the animals table called “location”. It should have a VARCHAR data type.
+alter table animals 
+add location varchar(100);
+-- Insert 3 new animals into the table – make sure none of their fields are null.
+insert into animals (name, age, type, location) 
+values ('Pikachu', 21, 'Electric Mouse', 'Kanto'), 
+('Cyndaquil', 17, 'Fire Mouse', 'Johto'),
+('Squirtle', 21, 'Water Turtle', 'Kanto');
+-- Change the “type” column’s name to be “species”.
+alter table animals
+rename column type to species;
+-- Change the “species” column data type to be VARCHAR.
+alter table animals
+alter column species varchar(100);
+-- Intermediate - Group By
+-- Find a count of how many tracks there are per genre. Display the genre name with the count.
+select g.name, count(*) 
+from track t
+join genre g on t.genre_id = g.genre_id
+group by g.name;
+-- Find a count of how many tracks are the “Pop” genre and how many tracks are the “Rock” genre.
+select g.name, count(*) 
+from track t
+join genre g on t.genre_id = g.genre_id
+where g.name in ('Pop', 'Rock')
+group by g.name;
+-- Find a list of all artists and how many albums they have.
+select ar.name, count(*) album_count 
+from artist ar
+join album al on ar.artist_id = al.artist_id
+group by ar.name;
+--------------------------------------------------------------------------------------------------
+
+--eCommerce Simulation - No Hints
+-- Let’s simulate an e-commerce site. We’re going to need to keep track of users, products, and the products users have added to their cart.
+-- users need an id, name, and an email
+-- products need an id, name, and a price
+-- cart should be a middle table that has an id, references both users and products, and has a quantity
+
+-- Instructions --------------------------------------------------------------------------------
+
+-- Create 3 tables following the criteria in the summary.
+create table users (id serial primary key, name varchar(100), email varchar(100));
+create table products (id serial primary key, name varchar(100), price int);
+create table cart (id serial primary key, user_id int references users(id), product_id int references products(id), quantity int);
+
+-- Add some data to fill up each table.
+-- At least 3 users
+insert into users (name, email)
+values ('Bob Saget', 'bobsaget@gmail.com'),
+('Jaquin Phoenix', 'RUNotEntertained@gmail.com'),
+('Christian Bale', 'TDKR@gmail.com');
+-- At least 5 products
+insert into products (name, price)
+values ('Javelin', 199),
+('Peanut Butter', 4.99),
+('Grappling Hook', 1099.99),
+('Video Camera', 499),
+('Bat-a-rang', 199);
+-- Each user should have at least 2 different products in their cart
+insert into cart (user_id, product_id, quantity)
+values (1, 2, 3),
+(1, 4, 4),
+(2,1,5),
+(2,4,2),
+(3,3,2),
+(3,5,10);
+-- Run queries against your data.
+-- Get all products in your first user’s cart
+select u.name, p.name, quantity
+from cart c
+join users u on c.user_id = u.id
+join products p on c.product_id = p.id
+where c.user_id = 1;
+-- Get products in all carts with all the users’ information
+select u.name, p.name, quantity
+from cart c
+join users u on c.user_id = u.id
+join products p on c.product_id = p.id;
+-- Get the total cost of an order (sum the price of all products on an cart).
+select sum(c.quantity*p.price) as total_price
+from cart c
+join users u on c.user_id = u.id
+join products p on c.product_id = p.id
+where c.user_id = 1;
+-- Update the quantity of a product in a user’s cart where the user’s id is 2
+update cart
+set quantity = 7
+where user_id = 2;
